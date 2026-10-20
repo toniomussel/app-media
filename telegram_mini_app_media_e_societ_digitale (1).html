@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="it" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Media e Società Digitale - UniCal Hub</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <!-- Google Fonts: Plus Jakarta Sans & Outfit -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#0b0f17',
+              card: '#161c28',
+              cardHover: '#1f2738',
+              pink: '#ec4899',
+              magenta: '#d946ef',
+              gold: '#f59e0b',
+              lightpink: '#f472b6',
+              accent: '#38bdf8'
+            }
+          },
+          fontFamily: {
+            outfit: ['Outfit', 'sans-serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #0b0f17;
+      color: #f3f4f6;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      overscroll-behavior-y: none;
+    }
+
+    h1, h2, h3, .font-heading {
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .glass-card {
+      background: rgba(22, 28, 40, 0.85);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(236, 72, 153, 0.15);
+    }
+
+    .glass-nav {
+      background: rgba(11, 15, 23, 0.92);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .pink-glow {
+      box-shadow: 0 0 25px rgba(236, 72, 153, 0.25);
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .tab-btn.active {
+      color: #ec4899;
+    }
+    .tab-btn.active i {
+      transform: translateY(-2px) scale(1.1);
+      color: #ec4899;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.8; }
+    }
+    .pulse-bg {
+      animation: pulseGlow 4s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="pb-28 text-slate-100 min-h-screen flex flex-col justify-between max-w-md mx-auto relative overflow-x-hidden">
+
+  <!-- TOP HEADER -->
+  <header class="sticky top-0 z-40 bg-[#0b0f17]/90 backdrop-blur-md px-4 py-3 flex items-center justify-between border-b border-brand-pink/20">
+    <div class="flex items-center space-x-3">
+      <div class="relative w-10 h-10 rounded-full bg-gradient-to-tr from-brand-pink via-brand-magenta to-brand-gold p-[2px] flex items-center justify-center shrink-0">
+        <div class="w-full h-full bg-brand-dark rounded-full flex items-center justify-center overflow-hidden">
+          <i class="fa-solid fa-graduation-cap text-brand-pink text-lg"></i>
+        </div>
+      </div>
+      <div>
+        <h1 class="text-sm font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-brand-pink via-brand-lightpink to-brand-gold leading-tight">
+          MEDIA E SOCIETÀ
+        </h1>
+        <p class="text-[10px] text-slate-400 font-bold tracking-wider uppercase">DIGITALE • DiSPeS UniCal</p>
+      </div>
+    </div>
+
+    <!-- EDITOR TOGGLE SWITCH -->
+    <div class="flex items-center space-x-2 bg-brand-card/90 px-2.5 py-1.5 rounded-full border border-brand-pink/30">
+      <i class="fa-solid fa-pen-to-square text-xs text-brand-pink"></i>
+      <label class="relative inline-flex items-center cursor-pointer">
+        <input type="checkbox" id="editorToggle" onchange="toggleEditorMode()" class="sr-only peer">
+        <div class="w-8 h-4 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-pink"></div>
+      </label>
+      <span class="text-[10px] font-bold text-slate-300">Edit</span>
+    </div>
+  </header>
+
+  <!-- BANNER EDITOR BAR (Visible only when Edit Mode is ON) -->
+  <div id="editorBar" class="hidden bg-gradient-to-r from-brand-pink/20 to-brand-gold/20 border-b border-brand-pink/30 px-4 py-2 flex items-center justify-between text-xs font-semibold text-brand-lightpink">
+    <span class="flex items-center gap-1.5"><i class="fa-solid fa-gear animate-spin"></i> Modalità Modifica Attiva</span>
+    <button onclick="resetDataToDefault()" class="px-2 py-0.5 bg-red-500/20 hover:bg-red-500/40 border border-red-500/40 text-red-300 rounded text-[10px] font-bold transition">
+      Reset Dati
+    </button>
+  </div>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main id="main-content" class="flex-grow px-4 pt-3 space-y-4">
+    <!-- Content dynamically rendered via JS -->
+  </main>
+
+  <!-- BOTTOM NAVIGATION BAR -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 glass-nav px-2 py-2 border-t border-slate-800">
+    <div class="max-w-md mx-auto grid grid-cols-5 text-center">
+      <button onclick="switchTab('insegnamenti')" id="tab-insegnamenti" class="tab-btn active flex flex-col items-center py-1 text-slate-400 transition-all">
+        <i class="fa-solid fa-book-open text-base mb-1 transition-transform"></i>
+        <span class="text-[10px] font-bold">Corsi</span>
+      </button>
+      <button onclick="switchTab('aule')" id="tab-aule" class="tab-btn flex flex-col items-center py-1 text-slate-400 transition-all">
+        <i class="fa-solid fa-location-dot text-base mb-1 transition-transform"></i>
+        <span class="text-[10px] font-bold">Aule</span>
+      </button>
+      <button onclick="switchTab('servizi')" id="tab-servizi" class="tab-btn flex flex-col items-center py-1 text-slate-400 transition-all">
+        <i class="fa-solid fa-utensils text-base mb-1 transition-transform"></i>
+        <span class="text-[10px] font-bold">Servizi</span>
+      </button>
+      <button onclick="switchTab('orari')" id="tab-orari" class="tab-btn flex flex-col items-center py-1 text-slate-400 transition-all">
+        <i class="fa-solid fa-calendar-days text-base mb-1 transition-transform"></i>
+        <span class="text-[10px] font-bold">Orari</span>
+      </button>
+      <button onclick="switchTab('gruppi')" id="tab-gruppi" class="tab-btn flex flex-col items-center py-1 text-slate-400 transition-all">
+        <i class="fa-brands fa-telegram text-base mb-1 transition-transform"></i>
+        <span class="text-[10px] font-bold">Gruppi</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- MODAL CONTAINER (Add / Edit items) -->
+  <div id="modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-card rounded-2xl p-5 w-full max-w-sm border-brand-pink/30 max-h-[85vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-2">
+        <h3 id="modal-title" class="text-base font-extrabold text-brand-pink font-heading">Modifica Elemento</h3>
+        <button onclick="closeModal()" class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div id="modal-body" class="space-y-3 text-xs">
+        <!-- Dynamic form inputs -->
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="fixed top-14 left-1/2 -translate-x-1/2 z-50 bg-brand-pink text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg hidden transition-all">
+    Azione completata!
+  </div>
+
+  <script>
+    // Initialize Telegram WebApp SDK
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.expand();
+      tg.ready();
+      if (tg.setHeaderColor) tg.setHeaderColor('#0b0f17');
+    }
+
+    function triggerHaptic(type = 'light') {
+      if (tg && tg.HapticFeedback) {
+        if (type === 'selection') tg.HapticFeedback.selectionChanged();
+        else tg.HapticFeedback.impactOccurred(type);
+      }
+    }
+
+    // DEFAULT DATA STRUCTURES
+    const defaultBanner = "A.A. 2024/2025 • Benvenuto nella Mini App ufficiale di Media e Società Digitale UniCal!";
+
+    const defaultInsegnamenti = [
+      { id: 1, nome: "Sociologia dei Media Digitali", cfu: 9, docente: "Prof.ssa M. A. Lopatriello", anno: "1° Anno", semestre: "1° Semestre", link: "https://corsi.unical.it/lt-lmcu/media-e-societa-digitale/cds/studiare/" },
+      { id: 2, nome: "Storia Contemporanea e dei Media", cfu: 9, docente: "Prof. G. M. De Rose", anno: "1° Anno", semestre: "1° Semestre", link: "https://corsi.unical.it/lt-lmcu/media-e-societa-digitale/cds/studiare/" },
+      { id: 3, nome: "Diritto dell'Informazione e del Digitale", cfu: 6, docente: "Prof. F. P. Jordan", anno: "1° Anno", semestre: "2° Semestre", link: "https://corsi.unical.it/lt-lmcu/media-e-societa-digitale/cds/studiare/" },
+      { id: 4, nome: "Comunicazione Pubblica e Social Media Management", cfu: 9, docente: "Prof. R. P. Fortunato", anno: "2° Anno", semestre: "1° Semestre", link: "https://corsi.unical.it/lt-lmcu/media-e-societa-digitale/cds/studiare/" }
+    ];
+
+    const defaultAule = [
+      { id: 1, nome: "Aula Magna DiSPeS", cubo: "0C", piano: "Piano Terra", note: "Polifunzionale • Capienza 120 posti", link: "https://maps.google.com/?q=UniCal+Cubo+0C" },
+      { id: 2, nome: "Laboratorio Multimediale", cubo: "1B", piano: "1° Piano", note: "Informatica • Postazioni PC attive", link: "https://maps.google.com/?q=UniCal+Cubo+1B" },
+      { id: 3, nome: "Aula Seminari DiSPeS", cubo: "18C", piano: "2° Piano", note: "Incontri e workshop dedicati", link: "https://maps.google.com/?q=UniCal+Cubo+18C" }
+    ];
+
+    const defaultGruppi = [
+      { id: 1, titolo: "Gruppo Telegram Principale", desc: "Community studenti A.A. 2024/25", icon: "fa-brands fa-telegram", color: "text-sky-400", link: "https://t.me/media_societa_digitale_unical" },
+      { id: 2, titolo: "Instagram Ufficiale", desc: "@mediaesocietadigitale", icon: "fa-brands fa-instagram", color: "text-pink-400", link: "https://instagram.com/mediaesocietadigitale" },
+      { id: 3, titolo: "Sito Web DiSPeS", desc: "Dipartimento Scienze Politiche e Sociali", icon: "fa-solid fa-globe", color: "text-brand-gold", link: "https://www.unical.it/dispes/" }
+    ];
+
+    // LOCAL STORAGE MANAGER
+    let isEditorActive = false;
+    let currentTab = 'insegnamenti';
+
+    let bannerText = localStorage.getItem('app_banner') || defaultBanner;
+    let insegnamenti = JSON.parse(localStorage.getItem('app_insegnamenti')) || defaultInsegnamenti;
+    let aule = JSON.parse(localStorage.getItem('app_aule')) || defaultAule;
+    let gruppi = JSON.parse(localStorage.getItem('app_gruppi')) || defaultGruppi;
+
+    function saveData() {
+      localStorage.setItem('app_banner', bannerText);
+      localStorage.setItem('app_insegnamenti', JSON.stringify(insegnamenti));
+      localStorage.setItem('app_aule', JSON.stringify(aule));
+      localStorage.setItem('app_gruppi', JSON.stringify(gruppi));
+    }
+
+    function resetDataToDefault() {
+      if (confirm("Sei sicuro di voler ripristinare tutti i dati originali?")) {
+        bannerText = defaultBanner;
+        insegnamenti = [...defaultInsegnamenti];
+        aule = [...defaultAule];
+        gruppi = [...defaultGruppi];
+        saveData();
+        showToast("Dati ripristinati!");
+        renderTab(currentTab);
+      }
+    }
+
+    function toggleEditorMode() {
+      isEditorActive = document.getElementById('editorToggle').checked;
+      document.getElementById('editorBar').classList.toggle('hidden', !isEditorActive);
+      triggerHaptic('medium');
+      renderTab(currentTab);
+    }
+
+    // UI RENDERERS FOR EACH TAB
+    function renderHeroBanner() {
+      return `
+        <div class="relative rounded-2xl p-4 glass-card border border-brand-pink/30 pink-glow overflow-hidden mb-4">
+          <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-brand-pink/20 rounded-full blur-2xl pointer-events-none pulse-bg"></div>
+          <div class="relative z-10 flex items-start justify-between">
+            <div class="space-y-1 pr-2">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-brand-pink/20 text-brand-lightpink text-[10px] font-bold border border-brand-pink/30">
+                <i class="fa-solid fa-bullhorn mr-1 text-[9px]"></i> AVVISO IN EVIDENZA
+              </span>
+              <p class="text-xs text-slate-200 font-medium leading-relaxed mt-1">${bannerText}</p>
+            </div>
+            ${isEditorActive ? `
+              <button onclick="editBannerText()" class="p-2 bg-brand-pink/20 text-brand-pink hover:bg-brand-pink hover:text-white rounded-lg transition shrink-0 text-xs">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderInsegnamenti() {
+      return `
+        ${renderHeroBanner()}
+        <div class="flex justify-between items-center mb-2">
+          <div>
+            <h2 class="text-base font-extrabold text-white font-heading flex items-center gap-2">
+              <i class="fa-solid fa-graduation-cap text-brand-gold"></i> Insegnamenti & Esami
+            </h2>
+            <p class="text-[11px] text-slate-400">Piano di studi ufficiale con CFU e docenti</p>
+          </div>
+          ${isEditorActive ? `
+            <button onclick="openAddInsegnamentoModal()" class="px-2.5 py-1.5 bg-brand-pink text-white rounded-xl text-xs font-bold shadow-md hover:brightness-110 active:scale-95 transition flex items-center gap-1">
+              <i class="fa-solid fa-plus text-xs"></i> Nuovo
+            </button>
+          ` : ''}
+        </div>
+
+        <div class="space-y-2.5">
+          ${insegnamenti.map(c => `
+            <div class="glass-card p-3.5 rounded-2xl border border-slate-800 hover:border-brand-pink/40 transition flex items-start justify-between relative group">
+              <div class="space-y-1">
+                <div class="flex items-center space-x-2">
+                  <span class="px-2 py-0.5 rounded-md bg-purple-900/40 border border-purple-500/30 text-[10px] font-bold text-purple-300">${c.anno}</span>
+                  <span class="text-[10px] text-slate-400 font-semibold">${c.semestre}</span>
+                </div>
+                <h3 class="font-extrabold text-sm text-white font-heading">${c.nome}</h3>
+                <p class="text-xs text-slate-300"><i class="fa-solid fa-user-tie text-brand-gold mr-1"></i>${c.docente}</p>
+                <div class="inline-block px-2 py-0.5 rounded bg-brand-pink/10 border border-brand-pink/20 text-brand-lightpink text-[10px] font-bold">
+                  <i class="fa-solid fa-award mr-1"></i>${c.cfu} CFU
+                </div>
+              </div>
+
+              <div class="flex items-center space-x-1.5 shrink-0 pl-2">
+                ${isEditorActive ? `
+                  <button onclick="editInsegnamento(${c.id})" class="p-2 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500/40 text-xs">
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <button onclick="deleteInsegnamento(${c.id})" class="p-2 rounded-lg bg-red-500/20 text-red-300 hover:bg-red-500/40 text-xs">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                ` : `
+                  <a href="${c.link}" target="_blank" onclick="triggerHaptic('light')" class="p-2.5 rounded-xl bg-slate-800 hover:bg-brand-pink text-slate-300 hover:text-white transition">
+                    <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                  </a>
+                `}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderAule() {
+      return `
+        <div class="flex justify-between items-center mb-2">
+          <div>
+            <h2 class="text-base font-extrabold text-white font-heading flex items-center gap-2">
+              <i class="fa-solid fa-location-dot text-brand-pink"></i> Mappa Aule & Ubicazioni
+            </h2>
+            <p class="text-[11px] text-slate-400">Posizioni e cubi del campus UniCal</p>
+          </div>
+          ${isEditorActive ? `
+            <button onclick="openAddAulaModal()" class="px-2.5 py-1.5 bg-brand-pink text-white rounded-xl text-xs font-bold shadow-md hover:brightness-110 active:scale-95 transition flex items-center gap-1">
+              <i class="fa-solid fa-plus text-xs"></i> Nuova
+            </button>
+          ` : ''}
+        </div>
+
+        <div class="grid grid-cols-1 gap-2.5">
+          ${aule.map(a => `
+            <div class="glass-card p-3.5 rounded-2xl border border-slate-800 hover:border-brand-pink/40 transition flex items-center justify-between">
+              <div class="space-y-0.5">
+                <div class="flex items-center space-x-2">
+                  <span class="px-2 py-0.5 rounded bg-brand-pink/20 text-brand-pink font-extrabold text-[10px]">Cubo ${a.cubo}</span>
+                  <span class="text-[10px] text-slate-400 font-medium">${a.piano}</span>
+                </div>
+                <h3 class="font-bold text-sm text-white">${a.nome}</h3>
+                <p class="text-xs text-slate-400">${a.note}</p>
+              </div>
+
+              <div class="flex items-center space-x-1.5 shrink-0 pl-2">
+                ${isEditorActive ? `
+                  <button onclick="editAula(${a.id})" class="p-2 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500/40 text-xs">
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <button onclick="deleteAula(${a.id})" class="p-2 rounded-lg bg-red-500/20 text-red-300 hover:bg-red-500/40 text-xs">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                ` : `
+                  ${a.link && a.link !== '#' ? `
+                    <a href="${a.link}" target="_blank" onclick="triggerHaptic('light')" class="px-3 py-1.5 bg-slate-800 hover:bg-brand-pink text-brand-pink hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-1">
+                      <i class="fa-solid fa-map-pin"></i> Mappa
+                    </a>
+                  ` : ''}
+                `}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderServizi() {
+      return `
+        <div class="space-y-4">
+          <!-- MENSA SERVIZIO -->
+          <div class="glass-card p-4 rounded-2xl border border-slate-800 space-y-3">
+            <div class="flex items-center space-x-2 border-b border-slate-800 pb-2.5">
+              <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+                <i class="fa-solid fa-utensils"></i>
+              </div>
+              <div>
+                <h3 class="font-extrabold text-sm text-white font-heading">Servizio Mensa & Punti UniCal</h3>
+                <p class="text-[11px] text-slate-400">Guida completa pasti e tariffe ISEE</p>
+              </div>
+            </div>
+
+            <div class="space-y-2 text-xs text-slate-300">
+              <p><strong class="text-emerald-400">Come accedere:</strong> Scarica l'app ufficiale <em>Smart UniCal</em> del Centro Residenziale e mostra il QR code all'ingresso.</p>
+              <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1.5 text-[11px]">
+                <p class="font-bold text-white">🥗 Funzionamento Punti Pasto:</p>
+                <ul class="list-disc list-inside text-slate-400 space-y-1">
+                  <li>Pasto completo (Primo, Secondo, Contorno, Frutta/Dolce, Pane e Bevanda).</li>
+                  <li>Tariffa calcolata automaticamente secondo l'ISEE Università inoltrato ad inizio anno.</li>
+                  <li>Pasti gratuiti o fortemente scontati per gli assegnatari di Borsa di Studio.</li>
+                </ul>
+              </div>
+              <p class="text-[11px] text-slate-400"><i class="fa-solid fa-store text-emerald-400 mr-1"></i>Mense attive: <strong>Martensson, Campus, San Gennaro</strong>.</p>
+            </div>
+          </div>
+
+          <!-- CLA SERVIZIO -->
+          <div class="glass-card p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-lg font-bold shrink-0">
+                <i class="fa-solid fa-language"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-sm text-white">Piattaforma CLA UniCal</h3>
+                <p class="text-xs text-slate-400">Centro Linguistico d'Ateneo (OLA)</p>
+              </div>
+            </div>
+            <a href="https://claola.unical.it/cla-angular/login" target="_blank" onclick="triggerHaptic('light')" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-md transition shrink-0 flex items-center gap-1.5">
+              <span>Login</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+            </a>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderOrari() {
+      return `
+        <div class="space-y-4">
+          <div class="flex items-center space-x-2 mb-1">
+            <div class="w-8 h-8 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold">
+              <i class="fa-solid fa-calendar-days"></i>
+            </div>
+            <div>
+              <h2 class="text-base font-extrabold text-white font-heading">Orario delle Lezioni</h2>
+              <p class="text-[11px] text-slate-400">Calendario lezioni ed aggiornamenti aule</p>
+            </div>
+          </div>
+
+          <div class="glass-card p-5 rounded-2xl border border-slate-800 text-center space-y-3">
+            <div class="w-14 h-14 bg-gradient-to-tr from-orange-500/20 to-brand-pink/20 rounded-full flex items-center justify-center mx-auto border border-orange-500/30">
+              <i class="fa-solid fa-clock text-orange-400 text-2xl"></i>
+            </div>
+            <h3 class="font-bold text-sm text-white">Consultazione Orari Ufficiali</h3>
+            <p class="text-xs text-slate-300 max-w-xs mx-auto">
+              Gli orari delle lezioni, comprese eventuali modifiche e cambi d'aula, sono pubblicati e aggiornati sul portale ufficiale del corso di laurea.
+            </p>
+            <a href="https://corsi.unical.it/lt-lmcu/media-e-societa-digitale/cds/studiare/orario-lezioni/" target="_blank" onclick="triggerHaptic('medium')" class="inline-flex items-center justify-center space-x-2 w-full py-3 bg-gradient-to-r from-orange-500 to-brand-pink text-white rounded-xl text-xs font-bold shadow-lg shadow-orange-500/20 hover:brightness-110 transition">
+              <i class="fa-solid fa-calendar-alt"></i>
+              <span>Apri Orario Lezioni Ufficiale</span>
+            </a>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderGruppi() {
+      return `
+        <div class="flex justify-between items-center mb-2">
+          <div>
+            <h2 class="text-base font-extrabold text-white font-heading flex items-center gap-2">
+              <i class="fa-brands fa-telegram text-sky-400"></i> Gruppi & Social Ufficiali
+            </h2>
+            <p class="text-[11px] text-slate-400">Canali della community di studenti</p>
+          </div>
+          ${isEditorActive ? `
+            <button onclick="openAddGruppoModal()" class="px-2.5 py-1.5 bg-brand-pink text-white rounded-xl text-xs font-bold shadow-md hover:brightness-110 active:scale-95 transition flex items-center gap-1">
+              <i class="fa-solid fa-plus text-xs"></i> Nuovo
+            </button>
+          ` : ''}
+        </div>
+
+        <div class="space-y-2.5">
+          ${gruppi.map(g => `
+            <div class="glass-card p-3.5 rounded-2xl border border-slate-800 hover:border-brand-pink/40 transition flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-lg ${g.color} shrink-0">
+                  <i class="${g.icon}"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-sm text-white">${g.titolo}</h3>
+                  <p class="text-xs text-slate-400">${g.desc}</p>
+                </div>
+              </div>
+
+              <div class="flex items-center space-x-1.5 shrink-0 pl-2">
+                ${isEditorActive ? `
+                  <button onclick="editGruppo(${g.id})" class="p-2 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500/40 text-xs">
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <button onclick="deleteGruppo(${g.id})" class="p-2 rounded-lg bg-red-500/20 text-red-300 hover:bg-red-500/40 text-xs">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                ` : `
+                  <a href="${g.link}" target="_blank" onclick="triggerHaptic('light')" class="px-3 py-1.5 bg-slate-800 hover:bg-brand-pink text-brand-pink hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-1">
+                    <span>Apri</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                  </a>
+                `}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // TAB SWITCHING
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`tab-${tab}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      triggerHaptic('selection');
+      renderTab(tab);
+    }
+
+    function renderTab(tab) {
+      const container = document.getElementById('main-content');
+      switch (tab) {
+        case 'insegnamenti': container.innerHTML = renderInsegnamenti(); break;
+        case 'aule': container.innerHTML = renderAule(); break;
+        case 'servizi': container.innerHTML = renderServizi(); break;
+        case 'orari': container.innerHTML = renderOrari(); break;
+        case 'gruppi': container.innerHTML = renderGruppi(); break;
+      }
+    }
+
+    // MODAL CONTROL & EDITOR ACTIONS
+    function openModal(title, bodyHtml) {
+      document.getElementById('modal-title').innerText = title;
+      document.getElementById('modal-body').innerHTML = bodyHtml;
+      document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 2200);
+    }
+
+    // BANNER EDIT
+    function editBannerText() {
+      const html = `
+        <label class="block text-slate-400 mb-1">Testo del Banner:</label>
+        <textarea id="edit-banner-input" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink">${bannerText}</textarea>
+        <button onclick="saveBannerText()" class="w-full py-2.5 bg-brand-pink text-white font-bold rounded-xl text-xs mt-2">Salva Banner</button>
+      `;
+      openModal("Modifica Avviso Banner", html);
+    }
+
+    function saveBannerText() {
+      bannerText = document.getElementById('edit-banner-input').value;
+      saveData();
+      closeModal();
+      showToast("Banner aggiornato!");
+      renderTab(currentTab);
+    }
+
+    // INSEGNAMENTI EDIT/ADD/DELETE
+    function openAddInsegnamentoModal() {
+      const html = `
+        <input id="ins-nome" type="text" placeholder="Nome Insegnamento" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        <div class="grid grid-cols-2 gap-2">
+          <input id="ins-cfu" type="number" placeholder="CFU (es. 9)" class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+          <input id="ins-anno" type="text" placeholder="Anno (es. 1° Anno)" class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        </div>
+        <input id="ins-semestre" type="text" placeholder="Semestre (es. 1° Semestre)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        <input id="ins-docente" type="text" placeholder="Docente" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        <input id="ins-link" type="text" placeholder="Link Scheda (opzionale)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" value="https://corsi.unical.it/lt-lmcu/media-e-societa-digitale/cds/studiare/" />
+        <button onclick="saveInsegnamento()" class="w-full py-2.5 bg-brand-pink text-white font-bold rounded-xl text-xs mt-2">Aggiungi Insegnamento</button>
+      `;
+      openModal("Aggiungi Insegnamento", html);
+    }
+
+    function editInsegnamento(id) {
+      const item = insegnamenti.find(x => x.id === id);
+      if (!item) return;
+
+      const html = `
+        <input id="ins-nome" type="text" value="${item.nome}" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        <div class="grid grid-cols-2 gap-2">
+          <input id="ins-cfu" type="number" value="${item.cfu}" class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+          <input id="ins-anno" type="text" value="${item.anno}" class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        </div>
+        <input id="ins-semestre" type="text" value="${item.semestre}" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        <input id="ins-docente" type="text" value="${item.docente}" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        <input id="ins-link" type="text" value="${item.link}" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        <button onclick="saveInsegnamento(${id})" class="w-full py-2.5 bg-brand-pink text-white font-bold rounded-xl text-xs mt-2">Salva Modifiche</button>
+      `;
+      openModal("Modifica Insegnamento", html);
+    }
+
+    function saveInsegnamento(id = null) {
+      const nome = document.getElementById('ins-nome').value;
+      const cfu = parseInt(document.getElementById('ins-cfu').value) || 6;
+      const anno = document.getElementById('ins-anno').value || '1° Anno';
+      const semestre = document.getElementById('ins-semestre').value || '1° Semestre';
+      const docente = document.getElementById('ins-docente').value || 'Docente UniCal';
+      const link = document.getElementById('ins-link').value || 'https://corsi.unical.it/lt-lmcu/media-e-societa-digitale/cds/studiare/';
+
+      if (!nome) return alert("Inserisci il nome del corso!");
+
+      if (id) {
+        const idx = insegnamenti.findIndex(x => x.id === id);
+        if (idx !== -1) insegnamenti[idx] = { id, nome, cfu, anno, semestre, docente, link };
+      } else {
+        insegnamenti.push({ id: Date.now(), nome, cfu, anno, semestre, docente, link });
+      }
+
+      saveData();
+      closeModal();
+      showToast("Insegnamento salvato!");
+      renderTab('insegnamenti');
+    }
+
+    function deleteInsegnamento(id) {
+      if (confirm("Eliminare questo corso?")) {
+        insegnamenti = insegnamenti.filter(x => x.id !== id);
+        saveData();
+        showToast("Eliminato!");
+        renderTab('insegnamenti');
+      }
+    }
+
+    // AULE EDIT/ADD/DELETE
+    function openAddAulaModal() {
+      const html = `
+        <input id="aula-nome" type="text" placeholder="Nome Aula (es. Aula Magna)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        <input id="aula-cubo" type="text" placeholder="Cubo (es. 0C)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        <input id="aula-piano" type="text" placeholder="Piano (es. Piano Terra)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        <input id="aula-note" type="text" placeholder="Dettagli / Note" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        <input id="aula-link" type="text" placeholder="Link Mappa (opzionale)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" value="#" />
+        <button onclick="saveAula()" class="w-full py-2.5 bg-brand-pink text-white font-bold rounded-xl text-xs mt-2">Aggiungi Aula</button>
+      `;
+      openModal("Aggiungi Nuova Aula", html);
+    }
+
+    function editAula(id) {
+      const item = aule.find(x => x.id === id);
+      if (!item) return;
+
+      const html = `
+        <input id="aula-nome" type="text" value="${item.nome}" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        <input id="aula-cubo" type="text" value="${item.cubo}" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        <input id="aula-piano" type="text" value="${item.piano}" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        <input id="aula-note" type="text" value="${item.note}" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        <input id="aula-link" type="text" value="${item.link}" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        <button onclick="saveAula(${id})" class="w-full py-2.5 bg-brand-pink text-white font-bold rounded-xl text-xs mt-2">Salva Modifiche</button>
+      `;
+      openModal("Modifica Aula", html);
+    }
+
+    function saveAula(id = null) {
+      const nome = document.getElementById('aula-nome').value;
+      const cubo = document.getElementById('aula-cubo').value;
+      const piano = document.getElementById('aula-piano').value || 'Piano Terra';
+      const note = document.getElementById('aula-note').value || '';
+      const link = document.getElementById('aula-link').value || '#';
+
+      if (!nome || !cubo) return alert("Inserisci Nome e Cubo!");
+
+      if (id) {
+        const idx = aule.findIndex(x => x.id === id);
+        if (idx !== -1) aule[idx] = { id, nome, cubo, piano, note, link };
+      } else {
+        aule.push({ id: Date.now(), nome, cubo, piano, note, link });
+      }
+
+      saveData();
+      closeModal();
+      showToast("Aula salvata!");
+      renderTab('aule');
+    }
+
+    function deleteAula(id) {
+      if (confirm("Eliminare questa aula?")) {
+        aule = aule.filter(x => x.id !== id);
+        saveData();
+        showToast("Eliminata!");
+        renderTab('aule');
+      }
+    }
+
+    // GRUPPI EDIT/ADD/DELETE
+    function openAddGruppoModal() {
+      const html = `
+        <input id="grp-titolo" type="text" placeholder="Titolo (es. Gruppo Telegram)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        <input id="grp-desc" type="text" placeholder="Descrizione breve" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        <input id="grp-link" type="text" placeholder="Link URL" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        <button onclick="saveGruppo()" class="w-full py-2.5 bg-brand-pink text-white font-bold rounded-xl text-xs mt-2">Aggiungi Gruppo</button>
+      `;
+      openModal("Aggiungi Gruppo/Link", html);
+    }
+
+    function editGruppo(id) {
+      const item = gruppi.find(x => x.id === id);
+      if (!item) return;
+
+      const html = `
+        <input id="grp-titolo" type="text" value="${item.titolo}" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        <input id="grp-desc" type="text" value="${item.desc}" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        <input id="grp-link" type="text" value="${item.link}" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-pink" />
+        <button onclick="saveGruppo(${id})" class="w-full py-2.5 bg-brand-pink text-white font-bold rounded-xl text-xs mt-2">Salva Modifiche</button>
+      `;
+      openModal("Modifica Gruppo", html);
+    }
+
+    function saveGruppo(id = null) {
+      const titolo = document.getElementById('grp-titolo').value;
+      const desc = document.getElementById('grp-desc').value || '';
+      const link = document.getElementById('grp-link').value || '#';
+
+      if (!titolo) return alert("Inserisci il titolo!");
+
+      if (id) {
+        const idx = gruppi.findIndex(x => x.id === id);
+        if (idx !== -1) gruppi[idx] = { ...gruppi[idx], titolo, desc, link };
+      } else {
+        gruppi.push({
+          id: Date.now(),
+          titolo,
+          desc,
+          icon: "fa-brands fa-telegram",
+          color: "text-sky-400",
+          link
+        });
+      }
+
+      saveData();
+      closeModal();
+      showToast("Gruppo salvato!");
+      renderTab('gruppi');
+    }
+
+    function deleteGruppo(id) {
+      if (confirm("Eliminare questo link/gruppo?")) {
+        gruppi = gruppi.filter(x => x.id !== id);
+        saveData();
+        showToast("Eliminato!");
+        renderTab('gruppi');
+      }
+    }
+
+    // INITIAL LAUNCH
+    window.onload = function() {
+      renderTab('insegnamenti');
+    };
+  </script>
+</body>
+</html>
